@@ -8,23 +8,38 @@ TSTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 ARCHIVE_NAME="backup_$SOURCE_BASE-$TSTAMP.tar.gz"
 DESTINATION="$BACKUP_DIR/$ARCHIVE_NAME"
 
-LOGFILE="$HOME/Library/Logs/backups-launchd.log"
+LOGFILE="$HOME/Library/Logs/automate-backup.log"
+ERRORLOG="$HOME/Library/Logs/automate-backup-error"
 
-/usr/bin/logger -t BACKUP_CRON "🔁 Cron triggered run-backup.sh at $(date)"
+log_msg(){
+  local type="$1"
+  local message="$2"
+  local timestamp="[$(date)]"
+
+  if [[ "$type" == "error" ]]; then
+    echo "$timestamp ❌ $message" >> "$ERRORLOG"
+    /usr/bin/logger -t BACKUP_LAUNCHD 
+  else
+    echo "$timestamp $message" >> "$LOGFILE"
+    /usr/bin/logger -t BACKUP_LAUNCHD "$message"
+  fi
+}
+
+log_msg "info" "🔁 Launchd triggered automate-backup.sh"
 
 if [[ -d "$BACKUP_DIR" ]]; then
-  /usr/bin/logger -t BACKUP_CRON "Directory Found!"
+  log_msg "info" "📁 Backup directory exists"
 else
-  /usr/bin/logger -t BACKUP_CRON "Backup folder not found"
+  log_msg "info" "❗ Backup directory not found. Creating..."
   mkdir -p "$BACKUP_DIR"
-  /usr/bin/logger -t BACKUP_CRON "Created backup folder in $BACKUP_DIR"
+  log_msg "info" "✅ Created backup directory at $BACKUP_DIR"
 fi
 
-/usr/bin/logger -t BACKUP_CRON "Starting backup up $SOURCE_DIR"
+log_msg "info" "🚀 Starting backup of $SOURCE_DIR"
 
 if tar -cvzf "$DESTINATION" "$SOURCE_DIR"; then
-  /usr/bin/logger -t BACKUP_CRON "Backup successful in $BACKUP_DIR"
+  log_msg "info" "✅ Backup successful: $DESTINATION"
 else
-  /usr/bin/logger -t BACKUP_CRON "Backup Failed for $SOURCE_DIR at $TSTAMP. Either the back up directory was not found or the source was not found."
+  log_msg "error" "❌ Backup FAILED at $TSTAMP. Check paths and permissions."
   exit 1
 fi
