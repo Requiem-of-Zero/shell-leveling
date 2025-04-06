@@ -8,38 +8,32 @@ TSTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 ARCHIVE_NAME="backup_$SOURCE_BASE-$TSTAMP.tar.gz"
 DESTINATION="$BACKUP_DIR/$ARCHIVE_NAME"
 
-LOGFILE="$HOME/Library/Logs/automate-backup.log"
-ERRORLOG="$HOME/Library/Logs/automate-backup-error"
+LOG_FILE="$HOME/Library/Logs/automate-backup-error.log"
 
 log_msg(){
-  local type="$1"
-  local message="$2"
-  local timestamp="[$(date)]"
+  local message="$1"
+  local timestamp
+  timestamp="[$(date)]"
 
-  if [[ "$type" == "error" ]]; then
-    echo "$timestamp ❌ $message" >> "$ERRORLOG"
-    /usr/bin/logger -t BACKUP_LAUNCHD 
-  else
-    echo "$timestamp $message" >> "$LOGFILE"
-    /usr/bin/logger -t BACKUP_LAUNCHD "$message"
-  fi
+  echo "$timestamp $message" >> "$LOG_FILE"
+  /usr/bin/logger -t BACKUP_LAUNCHD  "$message"
 }
 
-log_msg "info" "🔁 Launchd triggered automate-backup.sh"
+log_msg "🔁 Launchd triggered automate-backup.sh"
 
 if [[ -d "$BACKUP_DIR" ]]; then
-  log_msg "info" "📁 Backup directory exists"
+  log_msg "📁 Backup directory exists"
 else
-  log_msg "info" "❗ Backup directory not found. Creating..."
+  log_msg "❗ Backup directory not found. Creating..."
   mkdir -p "$BACKUP_DIR"
-  log_msg "info" "✅ Created backup directory at $BACKUP_DIR"
+  log_msg "✅ Created backup directory at $BACKUP_DIR"
 fi
 
-log_msg "info" "🚀 Starting backup of $SOURCE_DIR"
+log_msg "🚀 Starting backup of $SOURCE_DIR"
 
 if tar -cvzf "$DESTINATION" "$SOURCE_DIR"; then
-  log_msg "info" "✅ Backup successful: $DESTINATION"
+  log_msg "✅ Backup successful: $DESTINATION"
 else
-  log_msg "error" "❌ Backup FAILED at $TSTAMP. Check paths and permissions."
+  log_msg "❌ Backup FAILED at $TSTAMP. Check paths and permissions."
   exit 1
 fi
