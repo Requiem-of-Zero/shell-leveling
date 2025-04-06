@@ -7,7 +7,7 @@
 
     <key>ProgramArguments</key>
     <array>
-      <string>/Users/sdubyoo/Documents/bash-practice/run-backup-launchd.sh</string>
+      <string>/Users/sdubyoo/Documents/bash-practice/backup-automation/run-backup-launchd.sh</string>
     </array>
     <key>StartInterval</key>
     <integer>300</integer>
