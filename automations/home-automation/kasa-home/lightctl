@@ -1,0 +1,74 @@
+#!/home/sungjinwong/venv/bin/python
+
+import asyncio
+import json
+import sys
+from pathlib import Path
+from kasa import Device
+
+CONFIG = (
+    Path.home()
+    / "Projects/shell-leveling/automations/home-automation/kasa-home/devices.example.json"
+)
+
+
+def load_config():
+    with open(CONFIG, "r") as f:
+        return json.load(f)
+
+
+async def run_device(alias, action, config):
+    device_data = config["devices"].get(alias)
+
+    if not device_data:
+        print(f"Device not found: {alias}")
+        return
+
+    ip = device_data.get("ip")
+    name = device_data.get("name", alias)
+
+    if not ip:
+        print(f"No IP set for {alias}")
+        return
+
+    try:
+        dev = await Device.connect(host=ip)
+        await dev.update()
+
+        if action == "on":
+            await dev.turn_on()
+        elif action == "off":
+            await dev.turn_off()
+        elif action == "state":
+            print(f"{name}: {'ON' if dev.is_on else 'OFF'} | {ip}")
+            return
+        else:
+            print(f"Unsupported action: {action}")
+            return
+
+        print(f"{name} -> {action.upper()}")
+
+    except Exception as e:
+        print(f"{name} failed: {e}")
+
+
+async def main():
+    if len(sys.argv) < 3:
+        print("Usage: lightctl <device|group> <on|off|state>")
+        print("Example: lightctl kitchen off")
+        sys.exit(1)
+
+    target = sys.argv[1]
+    action = sys.argv[2]
+
+    config = load_config()
+
+    if target in config.get("groups", {}):
+        aliases = config["groups"][target]
+        await asyncio.gather(*(run_device(alias, action, config) for alias in aliases))
+    else:
+        await run_device(target, action, config)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

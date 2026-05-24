@@ -1,33 +1,16 @@
 {
-"devices": {
-    "router": {
-      "ip": "192.168.1.1",
-      "vendor": "Netgear",
-      "type": "router"
-    },
-
-    "living_room_light": {
-      "ip": "192.168.1.2",
-      "vendor": "TP-Link",
-      "type": "smart_light"
-    },
-
-    "bedroom_light": {
-      "ip": "192.168.1.4",
-      "vendor": "TP-Link",
-      "type": "smart_light"
-    },
-
-    "nest_device": {
-      "ip": "192.168.1.9",
-      "vendor": "Nest",
-      "type": "smart_home"
-    },
-
-    "macbook": {
-      "ip": "192.168.1.22",
-      "vendor": "Apple",
-      "type": "laptop"
-    }
+  "devices": {
+    "dad": { "ip": "192.168.1.2", "protocol": "kasa" },
+    "mom": { "ip": "192.168.1.4", "protocol": "kasa" },
+    "gong": { "ip": "192.168.1.5", "protocol": "kasa" },
+    "natalie": { "ip": "192.168.1.6", "protocol": "kasa" },
+    "sam": { "ip": "192.168.1.11", "protocol": "kasa" },
+    "kitchen1": { "ip": "192.168.1.100", "protocol": "kasa" },
+    "kitchen2": { "ip": "192.168.1.101", "protocol": "kasa" }
+  },
+  "groups": {
+    "kitchen": ["kitchen1", "kitchen2"],
+    "bedrooms": ["dad", "mom", "gong", "natalie", "sam"],
+    "all": ["dad", "mom", "gong", "natalie", "sam", "kitchen1", "kitchen2"]
   }
 }
