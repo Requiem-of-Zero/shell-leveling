@@ -1,0 +1,33 @@
+{
+"devices": {
+    "router": {
+      "ip": "192.168.1.1",
+      "vendor": "Netgear",
+      "type": "router"
+    },
+
+    "living_room_light": {
+      "ip": "192.168.1.2",
+      "vendor": "TP-Link",
+      "type": "smart_light"
+    },
+
+    "bedroom_light": {
+      "ip": "192.168.1.4",
+      "vendor": "TP-Link",
+      "type": "smart_light"
+    },
+
+    "nest_device": {
+      "ip": "192.168.1.9",
+      "vendor": "Nest",
+      "type": "smart_home"
+    },
+
+    "macbook": {
+      "ip": "192.168.1.22",
+      "vendor": "Apple",
+      "type": "laptop"
+    }
+  }
+}
