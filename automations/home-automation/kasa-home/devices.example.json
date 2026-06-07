@@ -11,6 +11,7 @@
   "groups": {
     "kitchen": ["kitchen1", "kitchen2"],
     "bedrooms": ["dad", "mom", "gong", "natalie", "sam"],
-    "all": ["dad", "mom", "gong", "natalie", "sam", "kitchen1", "kitchen2"]
+    "all": ["dad", "mom", "gong", "natalie", "sam", "kitchen1", "kitchen2"],
+    "women": ["natalie", "mom"]
   }
 }

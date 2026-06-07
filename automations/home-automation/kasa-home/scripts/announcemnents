@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+HA_URL="http://localhost:8123"
+HA_TOKEN="$(<"$HOME/.config/homeassistant/token")"
+
+declare -A TARGETS=(
+  [me]="media_player.sam_echo"
+  [sis]="media_player.natalie_echo"
+  [mom]="media_player.mom_echo"
+  [third]="media_player.samuel_s_3rd_echo_dot"
+  [firetv]="media_player.samuel_s_fire_tv_stick"
+  [all]="media_player.sam_echo,media_player.natalie_echo,media_player.mom_echo,media_player.samuel_s_3rd_echo_dot"
+)
+TARGET_KEY="${1:-}"
+
+if [[ -z "$TARGET_KEY" ]]; then
+  echo "Usage: ./announcements <me|sis|mom|firetv|all> \"message\""
+  exit 1
+fi
+
+if [[ -z "${TARGETS[$TARGET_KEY]:-}" ]]; then
+  echo "Unknown target: $TARGET_KEY"
+  echo "Available: ${!TARGETS[*]}"
+  exit 1
+fi
+
+shift
+MESSAGE="$*"
+
+if [[ -z "$MESSAGE" ]]; then
+  echo "Missing message."
+  echo "Usage: ./announcements <me|sis|mom|firetv|all> \"message\""
+  exit 1
+fi
+
+IFS=',' read -ra TARGET_ARRAY <<< "${TARGETS[$TARGET_KEY]}"
+
+TARGET_JSON="["
+for target in "${TARGET_ARRAY[@]}"; do
+  TARGET_JSON+="\"$target\","
+done
+TARGET_JSON="${TARGET_JSON%,}]"
+
+curl -X POST \
+  -H "Authorization: Bearer $HA_TOKEN" \
+  -H "Content-Type: application/json" \
+  "$HA_URL/api/services/notify/alexa_media" \
+  -d "{
+    \"message\": \"$MESSAGE\",
+    \"target\": $TARGET_JSON,
+    \"data\": {
+      \"type\": \"announce\"
+    }
+  }"
