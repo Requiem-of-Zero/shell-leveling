@@ -17,7 +17,79 @@ def load_config():
         return json.load(f)
 
 
-async def run_device(alias, action, config):
+def parse_seconds(value, label):
+    raw = value.strip().lower()
+    units = {
+        "ms": 0.001,
+        "s": 1,
+        "m": 60,
+    }
+
+    for suffix, multiplier in units.items():
+        if raw.endswith(suffix):
+            number = raw[: -len(suffix)]
+            break
+    else:
+        number = raw
+        multiplier = 1
+
+    try:
+        seconds = float(number)
+    except ValueError:
+        raise ValueError(f"{label} must be a number, optionally ending in ms, s, or m")
+
+    if seconds <= 0:
+        raise ValueError(f"{label} must be greater than 0")
+
+    return seconds * multiplier
+
+
+def parse_speed(value):
+    raw = value.strip().lower()
+
+    if raw.endswith("hz"):
+        try:
+            flashes_per_second = float(raw[:-2])
+        except ValueError:
+            raise ValueError(
+                "Speed must be a number, optionally ending in ms, s, m, or hz"
+            )
+
+        if flashes_per_second <= 0:
+            raise ValueError("Speed must be greater than 0")
+
+        return 1 / (flashes_per_second * 2)
+
+    if raw[-1:].isdigit() and float(raw) >= 10:
+        return parse_seconds(f"{raw}ms", "Speed")
+
+    return parse_seconds(raw, "Speed")
+
+
+async def strobe_device(dev, duration, speed):
+    original_state = dev.is_on
+    deadline = asyncio.get_running_loop().time() + duration
+    turn_on_next = not original_state
+
+    try:
+        while asyncio.get_running_loop().time() < deadline:
+            if turn_on_next:
+                await dev.turn_on()
+            else:
+                await dev.turn_off()
+
+            turn_on_next = not turn_on_next
+            remaining = deadline - asyncio.get_running_loop().time()
+            if remaining > 0:
+                await asyncio.sleep(min(speed, remaining))
+    finally:
+        if original_state:
+            await dev.turn_on()
+        else:
+            await dev.turn_off()
+
+
+async def run_device(alias, action, config, duration=None, speed=None):
     device_data = config["devices"].get(alias)
 
     if not device_data:
@@ -42,6 +114,8 @@ async def run_device(alias, action, config):
         elif action == "state":
             print(f"{name}: {'ON' if dev.is_on else 'OFF'} | {ip}")
             return
+        elif action == "strobe":
+            await strobe_device(dev, duration, speed)
         else:
             print(f"Unsupported action: {action}")
             return
@@ -55,19 +129,46 @@ async def run_device(alias, action, config):
 async def main():
     if len(sys.argv) < 3:
         print("Usage: lightctl <device|group> <on|off|state>")
+        print("       lightctl <device|group> strobe <duration> <speed>")
         print("Example: lightctl kitchen off")
+        print("Example: lightctl kitchen strobe 10s 500ms")
+        print("Speed can be 500ms, 0.5s, 2hz, or bare milliseconds like 500")
         sys.exit(1)
 
     target = sys.argv[1]
     action = sys.argv[2]
+    duration = None
+    speed = None
+
+    if action == "strobe":
+        if len(sys.argv) != 5:
+            print("Usage: lightctl <device|group> strobe <duration> <speed>")
+            print("Example: lightctl kitchen strobe 10s 500ms")
+            print("Speed can be 500ms, 0.5s, 2hz, or bare milliseconds like 500")
+            sys.exit(1)
+
+        try:
+            duration = parse_seconds(sys.argv[3], "Duration")
+            speed = parse_speed(sys.argv[4])
+        except ValueError as e:
+            print(e)
+            sys.exit(1)
+
+        if speed >= duration:
+            print("Speed interval must be shorter than duration")
+            print("Example: lightctl kitchen strobe 10s 500ms")
+            print("Speed can be 500ms, 0.5s, 2hz, or bare milliseconds like 500")
+            sys.exit(1)
 
     config = load_config()
 
     if target in config.get("groups", {}):
         aliases = config["groups"][target]
-        await asyncio.gather(*(run_device(alias, action, config) for alias in aliases))
+        await asyncio.gather(
+            *(run_device(alias, action, config, duration, speed) for alias in aliases)
+        )
     else:
-        await run_device(target, action, config)
+        await run_device(target, action, config, duration, speed)
 
 
 if __name__ == "__main__":
