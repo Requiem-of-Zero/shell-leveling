@@ -9,9 +9,6 @@ declare -A TARGETS=(
   [me]="media_player.sam_echo"
   [sis]="media_player.natalie_echo"
   [mom]="media_player.mom_echo"
-  [third]="media_player.samuel_s_3rd_echo_dot"
-  [firetv]="media_player.samuel_s_fire_tv_stick"
-  [all]="media_player.sam_echo,media_player.natalie_echo,media_player.mom_echo,media_player.samuel_s_3rd_echo_dot"
 )
 TARGET_KEY="${1:-}"
 
