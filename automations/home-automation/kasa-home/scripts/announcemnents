@@ -4,50 +4,218 @@ set -euo pipefail
 
 HA_URL="http://localhost:8123"
 HA_TOKEN="$(<"$HOME/.config/homeassistant/token")"
-
-declare -A TARGETS=(
-  [me]="media_player.sam_echo"
-  [sis]="media_player.natalie_echo"
-  [mom]="media_player.mom_echo"
+RICKROLL_SONG="Never Gonna Give You Up by Rick Astley"
+RICKROLL_SOURCE="AMAZON_MUSIC"
+GOOD_MORNING_MESSAGE="Good morning."
+MAX_VOLUME=1.0
+WELCOME_NATALIE_MESSAGE="Attention household. A very important announcement is now in progress.|Please welcome home Natalie, also known as the reigning champion of sleeping in, professional blanket enthusiast, and part-time collector of unfinished alarms.|Our sensors indicate that she has successfully returned to base. The kitchen is standing by. The refrigerator has been notified. The couch has entered a state of heightened anticipation.|Natalie, your daily objectives have been updated. Step one: acquire food. Step two: pretend to be productive. Step three: explain why you were definitely not on your phone five minutes ago.|On behalf of the smart home network, the lights, the Wi-Fi, the television, and one extremely motivated older brother, welcome home.|Have a wonderful day, Natalie. This announcement has been approved by absolutely nobody."
+BOOK_CHAPTERS=(
+  "Chapter one. The Moonlit Button|Mina found a silver button under her pillow, even though her pajamas had no buttons at all. It was smooth on one side and engraved on the other with a tiny map of stars that seemed to rearrange whenever she blinked.|She held it up to the window, and the button shone like a tiny moon. A pale beam slipped across the floor, climbed the wall, and pointed straight through the glass toward the garden gate.|Mina wrapped herself in her blue robe and stepped outside. The sleepy flowers nodded hello, the tomato plants whispered weather reports, and a path of blue light curled between the stepping stones like a ribbon being pulled by an invisible hand.|At the end of the path sat a train no larger than a teacup. It had acorn wheels, lanterns for eyes, and a chimney that puffed out glittering bubbles. The conductor, who wore a thimble for a hat, bowed so low his mustache brushed the rail.|All aboard for Somewhere Shortly, he said. Mina asked whether Somewhere Shortly was far away. The conductor checked a watch made from a snail shell and said, not if you leave at once, but terribly far if you wait until yesterday.|Mina climbed into the first carriage. It smelled of cinnamon toast and library dust. The train clicked forward, crossing the lawn, the fence, and then a bridge that Mina was certain had not been there before.|Below the bridge, the dark garden had become a slow silver sea. Lettuce leaves bobbed like boats, and a family of beetles practiced rowing in a walnut shell. Mina waved, and the smallest beetle saluted with a blade of grass.|The train stopped beside a round hill with one yellow door. The conductor gave Mina a ticket punched in the shape of a crescent moon and told her to keep the button safe, because some doors only opened for things that had once been lost.|Inside the hill, Mina found a room full of sleeping clocks. Each clock snored at a different speed. In the middle of them all stood a wooden box labeled, mornings not yet used.|Mina opened the box and found a single warm sunbeam folded like a scarf. She tucked it beside the silver button, thanked the clocks very quietly, and rode home just as the birds began tuning themselves for breakfast."
+  "Chapter two. The Library Under the Stairs|Theo was sure the cupboard under the stairs only held shoes, umbrellas, and the vacuum cleaner with the squeaky wheel. Then, on a rainy afternoon, the cupboard sneezed.|He opened the door and found a library no taller than his knee. Books climbed ladders, bookmarks swept the floor, and dust wore spectacles while pretending to be important.|A red book waved its ribbon and asked Theo to help find its missing ending. Without an ending, the book said, everyone inside had been standing around politely for three days, unsure whether to celebrate, apologize, or go home.|Theo crawled through the doorway, shrinking just enough to fit. He followed the red book past shelves labeled almost true, probably useful, and do not open before lunch.|They searched behind commas, under question marks, and inside a dramatic exclamation point that shouted every time they came near. Theo found three misplaced morals, a lonely footnote, and a villain who had changed careers and become a baker.|At last, they heard snoring from a chipped teacup on the return desk. Curled inside was the missing ending, wearing pajamas printed with tiny periods. It complained that nobody appreciated how tiring it was to finish everything.|Theo carried the ending back to the red book. The moment it slipped into place, the characters inside cheered. A knight returned a borrowed ladder, a queen forgave a pie, and a dragon agreed to stop setting fire to chapter headings.|The library held a small ceremony. Theo was awarded a bookmark that always remembered the page he wanted, even if he did not. The dust gave a speech, but it was mostly sneezing.|When Theo crawled back out, the cupboard looked ordinary again. Still, whenever rain tapped the windows, he could hear pages turning beneath the stairs, and sometimes a book would cough politely until he came to visit."
+  "Chapter three. The Cloud That Forgot|One morning, a little cloud drifted so low that it bumped into Nora's kite. The kite spun in circles, the cloud apologized three times, and Nora had to untangle the string from a very confused weather vane.|Excuse me, said the cloud. I seem to have forgotten where the sky is. Nora looked up at the enormous blue ceiling above them and pointed, but the cloud only squinted. That looks familiar, it said, but I cannot remember the way.|Nora tied a red ribbon around the cloud so it would not wander into the pond. Then she packed a biscuit, a pencil, and a jar of wind she had been saving for emergencies.|They asked the tallest poplar tree for directions. The tree rustled thoughtfully and said the sky was somewhere above birds, below stars, and usually full of clouds who paid attention.|They asked the wind next. The wind was busy tickling chimneys, but it paused long enough to whoosh Nora's hat into the air. Follow that, it said. So Nora, the kite, and the cloud hurried after the hat.|They climbed the hill behind the school, where the grass grew sideways because it had heard exciting rumors from the west. Nora opened the jar of wind, and out rushed a breeze that smelled like raincoats and faraway fields.|The breeze puffed beneath the cloud and lifted it higher. Nora held the kite string tight while the cloud rose above the rooftops, then the church steeple, then the nervous weather vane.|Halfway up, the cloud remembered thunder, puddles, and the polite way to shade a picnic. By sunset, it remembered how to blush pink. It promised Nora gentle rain for the carrots and a cloud shaped like a rabbit every Thursday.|The next morning, Nora found her red ribbon tied around the handle of her watering can. Inside the can was a note made of mist that said, thank you for pointing me upward."
+  "Chapter four. The Pancake Map|Leo's breakfast pancake had a river of syrup, a butter mountain, and one blueberry island. This was already excellent, but then a tiny flag popped up on the blueberry island and a voice shouted, explorers needed.|Leo leaned close. A crumb wearing a bottle cap helmet stood beside the flag. I am Captain Crisp, said the crumb. We must cross the syrup river before the butter mountain melts into history.|Leo fetched a toothpick boat from the kitchen drawer and lowered it carefully into the syrup. Captain Crisp climbed aboard with three sesame seed sailors and a raisin who claimed to be a cartographer.|The voyage was slow and sticky. Twice they nearly ran aground on pancake bubbles. Once, a wave of syrup splashed over the side, and everyone had to lick themselves free, which Captain Crisp called standard nautical procedure.|At the foot of butter mountain, the explorers found a warm golden cave. Inside slept a sprinkle dragon, curled around a treasure of powdered sugar. The dragon opened one eye and asked whether they had brought napkins.|Leo offered part of his orange slice as tribute. The dragon accepted, sneezed a puff of cinnamon, and allowed the expedition to climb to the summit.|From the top of butter mountain, Captain Crisp saw the whole breakfast kingdom: toast cliffs, eggy plains, and the distant glass of milk where, according to legend, spoons went to think.|Leo promised not to eat the pancake until the explorers finished their parade. The parade lasted exactly three minutes, which was heroic and also convenient.|When breakfast was finally over, Leo found the tiny flag stuck to his sleeve. Captain Crisp had written on it in syrup: thank you for not being an impatient giant."
+  "Chapter five. The Sock Drawer Sea|Amara opened her sock drawer and heard waves. This was unusual, because socks normally rustled, slumped, or disappeared, but did not splash.|Inside the drawer was a blue sea with striped socks floating like fish. A pair of yellow socks had tied themselves into a raft, and a single green sock stood on the shore waving a paperclip oar.|The green sock explained that its matching sock had sailed beyond the lint fog and had not returned. Amara, who understood the sorrow of missing things, agreed to captain a rescue mission.|She made a compass from a button, a magnet, and a very patient safety pin. Then she pushed the yellow raft into the drawer sea and sailed between cliffs of folded pajamas.|The lint fog smelled like clean laundry and secrets. Shapes moved inside it: mittens, old receipts, and one marble that had been missing since kindergarten. Amara called out for the lost sock, and something called back in a muffled voice.|They found the missing sock trapped around an island of static. Every time it tried to leave, it stuck to the air. Amara rubbed the sock gently with a dryer sheet, and the static island sighed itself flat.|The two green socks hugged by folding neatly together. In gratitude, the sock drawer sea returned three hair ties, a library card, and a note that simply said, check behind the hamper.|After that day, Amara never complained about matching socks. She knew every pair might have survived a voyage, and every drawer might be deeper than it looked."
+  "Chapter six. The Doorbell in the Attic|The attic doorbell rang at exactly midnight, even though the attic had no doorbell and nobody sensible visits an attic at midnight.|Jules climbed the ladder with a flashlight and a blanket around his shoulders. The attic smelled of cardboard, old coats, and the kind of dust that has opinions.|Beside a box of holiday ornaments stood a brass doorbell on a velvet cushion. It rang again, politely impatient. Next to it was an envelope addressed to whoever is brave enough and not too sleepy.|Inside the envelope was an invitation to the Annual Midnight Meeting of Forgotten Things. Jules looked around. The broken lamp, the roller skates, and a rocking horse with one painted eye were all waiting expectantly.|The meeting began when the doorbell cleared its throat. The old roller skates requested one last race. The broken lamp wanted to glow again, even briefly. The rocking horse asked for a name, because nobody had remembered it.|Jules found batteries, tape, string, and a red marker. He fixed the lamp enough for it to shine like a tired star. He tied cushions to the skates and rolled them carefully across the attic floor. He named the horse Pepper.|The forgotten things applauded in their own ways. The lamp flickered, the skates rattled, and Pepper rocked forward once, proud as a parade.|Before Jules went back downstairs, the brass doorbell gave him a tiny card. It said, nothing is forgotten while someone is willing to listen.|In the morning, Jules's parents found him asleep on the couch with dust on his nose and a red marker in his hand. Upstairs, in the attic, Pepper faced the window and watched the sun come in."
 )
+
+target_entities() {
+  case "$1" in
+    me)
+      echo "media_player.sam_echo"
+      ;;
+    mom)
+      echo "media_player.mom_echo"
+      ;;
+    sis)
+      echo "media_player.samuel_s_3rd_echo_dot"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 TARGET_KEY="${1:-}"
 
 if [[ -z "$TARGET_KEY" ]]; then
-  echo "Usage: ./announcements <me|sis|mom|firetv|all> \"message\""
+  echo "Usage: announcementctl <me|sis|mom> \"message\""
+  echo "       announcementctl <me|sis|mom> rickroll"
+  echo "       announcementctl <me|sis|mom> welcome-natalie"
+  echo "       announcementctl <me|sis|mom> read-book"
+  echo "       announcementctl <me|sis|mom> spam-good-morning"
+  echo "       announcementctl <me|sis|mom> --max-volume <command>"
   exit 1
 fi
 
-if [[ -z "${TARGETS[$TARGET_KEY]:-}" ]]; then
+if ! TARGETS="$(target_entities "$TARGET_KEY")"; then
   echo "Unknown target: $TARGET_KEY"
-  echo "Available: ${!TARGETS[*]}"
+  echo "Available: me mom sis"
   exit 1
 fi
 
 shift
-MESSAGE="$*"
+MESSAGE=""
+USE_MAX_VOLUME=false
 
-if [[ -z "$MESSAGE" ]]; then
+ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --max-volume|--max-vol|--loud)
+      USE_MAX_VOLUME=true
+      ;;
+    *)
+      ARGS+=("$arg")
+      ;;
+  esac
+done
+
+set -- "${ARGS[@]}"
+
+case "${1:-}" in
+  rickroll|--rickroll)
+    ACTION="rickroll"
+    ;;
+  welcome-natalie|welcome-home-natalie|natalie-home)
+    ACTION="welcome-natalie"
+    ;;
+  read-book|book|bedtime-story|--read-book)
+    ACTION="read-book"
+    ;;
+  spam-good-morning|good-morning-spam|--spam-good-morning)
+    ACTION="spam-good-morning"
+    ;;
+  *)
+    ACTION="announce"
+    MESSAGE="$*"
+    ;;
+esac
+
+if [[ "$ACTION" == "announce" && -z "$MESSAGE" ]]; then
   echo "Missing message."
-  echo "Usage: ./announcements <me|sis|mom|firetv|all> \"message\""
+  echo "Usage: announcementctl <me|sis|mom> \"message\""
+  echo "       announcementctl <me|sis|mom> rickroll"
+  echo "       announcementctl <me|sis|mom> welcome-natalie"
+  echo "       announcementctl <me|sis|mom> read-book"
+  echo "       announcementctl <me|sis|mom> spam-good-morning"
+  echo "       announcementctl <me|sis|mom> --max-volume <command>"
   exit 1
 fi
 
-IFS=',' read -ra TARGET_ARRAY <<< "${TARGETS[$TARGET_KEY]}"
+IFS=',' read -ra TARGET_ARRAY <<< "$TARGETS"
 
-TARGET_JSON="["
-for target in "${TARGET_ARRAY[@]}"; do
-  TARGET_JSON+="\"$target\","
-done
-TARGET_JSON="${TARGET_JSON%,}]"
+TARGET_JSON="$(printf '%s\n' "${TARGET_ARRAY[@]}" | jq -R . | jq -cs .)"
 
-curl -X POST \
-  -H "Authorization: Bearer $HA_TOKEN" \
-  -H "Content-Type: application/json" \
-  "$HA_URL/api/services/notify/alexa_media" \
-  -d "{
-    \"message\": \"$MESSAGE\",
-    \"target\": $TARGET_JSON,
-    \"data\": {
-      \"type\": \"announce\"
-    }
-  }"
+set_max_volume() {
+  curl -X POST \
+    -H "Authorization: Bearer $HA_TOKEN" \
+    -H "Content-Type: application/json" \
+    "$HA_URL/api/services/media_player/volume_set" \
+    -d "$(jq -nc \
+      --argjson entity_id "$TARGET_JSON" \
+      --argjson volume_level "$MAX_VOLUME" \
+      '{entity_id: $entity_id, volume_level: $volume_level}')"
+}
+
+play_rickroll() {
+  curl -X POST \
+    -H "Authorization: Bearer $HA_TOKEN" \
+    -H "Content-Type: application/json" \
+    "$HA_URL/api/services/media_player/play_media" \
+    -d "$(jq -nc \
+      --argjson entity_id "$TARGET_JSON" \
+      --arg media_content_id "$RICKROLL_SONG" \
+      --arg media_content_type "$RICKROLL_SOURCE" \
+      '{
+        entity_id: $entity_id,
+        media_content_id: $media_content_id,
+        media_content_type: $media_content_type
+      }')"
+}
+
+announce() {
+  local message="$1"
+
+  curl -X POST \
+    -H "Authorization: Bearer $HA_TOKEN" \
+    -H "Content-Type: application/json" \
+    "$HA_URL/api/services/notify/alexa_media" \
+    -d "$(jq -nc \
+      --arg message "$message" \
+      --argjson target "$TARGET_JSON" \
+      '{
+        message: $message,
+        target: $target,
+        data: {
+          type: "announce"
+        }
+      }')"
+}
+
+announce_parts() {
+  local script="$1"
+  local part
+
+  IFS='|' read -ra parts <<< "$script"
+  for part in "${parts[@]}"; do
+    announce "$part"
+    sleep 2
+  done
+}
+
+welcome_natalie() {
+  announce_parts "$WELCOME_NATALIE_MESSAGE"
+}
+
+read_book() {
+  local chapter
+
+  echo "Reading story chapters until stopped; press Ctrl-C to stop."
+
+  while true; do
+    chapter="${BOOK_CHAPTERS[$((RANDOM % ${#BOOK_CHAPTERS[@]}))]}"
+    echo "Reading: ${chapter%%|*}"
+
+    announce_parts "$chapter"
+
+    sleep 5
+  done
+}
+
+spam_good_morning() {
+  echo "Spamming good morning every 1s; press Ctrl-C to stop."
+
+  while true; do
+    announce "$GOOD_MORNING_MESSAGE"
+    sleep 1
+  done
+}
+
+prepare_audio() {
+  if [[ "$USE_MAX_VOLUME" == "true" ]]; then
+    set_max_volume
+    sleep 0.5
+  fi
+}
+
+case "$ACTION" in
+  rickroll)
+    prepare_audio
+    play_rickroll
+    ;;
+  welcome-natalie)
+    prepare_audio
+    welcome_natalie
+    ;;
+  read-book)
+    prepare_audio
+    read_book
+    ;;
+  spam-good-morning)
+    prepare_audio
+    spam_good_morning
+    ;;
+  announce)
+    prepare_audio
+    announce "$MESSAGE"
+    ;;
+esac
